@@ -12,6 +12,10 @@ service SecurityRoute @(path:'/api/security') {
   @path: 'catalogs'
   function catalogs(labelid: String, valueid: String) returns array of CatalogWithValues;
 
+  @Core.Description: 'Obtener catálogos de departametno por coamñia'
+  @path: 'catalogsCompanie'
+  function catalogsCompanie(labelid: String) returns array of CatalogWithValues;
+
   @Core.Description: 'Borrado lógico de catalogo'
   @path: 'deletecatalogs'
   action deletecatalogs(labelid: String) returns String;
@@ -28,11 +32,15 @@ service SecurityRoute @(path:'/api/security') {
   @Core.Description: 'Obtener usuarios o usuario por ID (en el body se envía userid)'
   @path: 'users'
   function users(userid: String) returns array of User;
+  
+  @Core.Description: 'Obtener usuarios por el correo electrónico'
+  @path: 'userEmail'
+  function userEmail(email: String) returns array of User;
 
   @Core.Description: 'Obtener usuarios auqnue esten desactivados'
   @path: 'usersAll'
   function usersAll(userid: String) returns array of User;
-  
+
   @Core.Description: 'Crear usuario'
   @path: 'createuser'
   action createuser(user: User) returns User;

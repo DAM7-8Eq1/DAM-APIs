@@ -50,6 +50,22 @@ async function getCatalogByLabelAndValue(req) {
   };
 }
 
+
+async function getAllCatalogsByLabelForCompanie(req) {
+    await connect();
+  const { labelid } = req.data;
+  if (!labelid) return null;
+
+  const value = await ZtValue.find({ VALUEPAID:  "IdCompanies-"+labelid }).lean();
+  if (!value) return null;
+
+
+  return {
+   value
+  };
+}
+
+
 async function catalogs(req) {
   const { labelid, valueid } = req.data || {};
   if (labelid && valueid) {
@@ -115,6 +131,14 @@ async function getUserById(req) {
   if (!userid) return null;
   return ZtUser.findOne({ USERID: userid }).lean();
 }
+
+async function getUserByEmail(req) {
+  await connect();
+  const { email } = req.data;
+  if (!email) return null;
+  return ZtUser.findOne({ EMAIL: email }).lean();
+}
+
 
 async function createUser(req) {
   await connect();
@@ -301,9 +325,11 @@ module.exports = {
   logicalDeleteCatalog,
   updateCatalog,
   physicalDeleteCatalog,
+  getAllCatalogsByLabelForCompanie,
   // Usuarios
   getAllUsers,
   getUserById,
+  getUserByEmail,
   getAllUsersDesactive,
   createUser,
   updateUser,

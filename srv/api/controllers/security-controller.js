@@ -21,6 +21,11 @@ class SecurityController extends cds.ApplicationService {
       return svc.physicalDeleteCatalog(req);
     });
 
+    
+    this.on('catalogsCompanie', async (req) => {
+      return svc.getAllCatalogsByLabelForCompanie(req);
+    });   
+
     // ─── USUARIOS ─────────────────────────────
     // GET: Obtener usuarios o un usuario específico (según query param "userid")
     this.on('users', async (req) => {
@@ -29,6 +34,10 @@ class SecurityController extends cds.ApplicationService {
     
     this.on('usersAll', async (req) => {
       return svc.getAllUsersDesactive(req);
+    });
+    // GET: Obtener un usuario por su email
+    this.on('userEmail', async (req) => {
+      return svc.getUserByEmail(req);
     });
 
     // POST: Crear usuario
