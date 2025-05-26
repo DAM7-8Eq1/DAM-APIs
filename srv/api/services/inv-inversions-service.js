@@ -354,7 +354,7 @@ async function simulateSupertrend(req) {
         ],
       },
     ];
-
+    console.log("CHART_DATA: ",chartData);
     return {
       SIMULATIONID,
       USERID,
@@ -895,7 +895,7 @@ function calculateMovingAverageData(fullHistory, startDate, endDate, shortMa, lo
     console.log("Signals generated: ", signals);
     return {
         priceData: dataWithMAs.map(item => ({
-            date: item.price_history.date,
+            date: new Date(item.price_history.date),
             open: item.price_history.open,
             high: item.price_history.high,
             low: item.price_history.low,
@@ -1055,7 +1055,7 @@ async function SimulateMACrossover(body) {
 
         // Formatear datos para el gráfico
         const chartData = priceData.map(item => ({
-            DATE: item.date,
+            DATE: item.date.toISOString().split('T')[0],
             OPEN: item.open,
             HIGH: item.high,
             LOW: item.low,
@@ -1112,9 +1112,9 @@ async function SimulateMACrossover(body) {
         // Guardar en MongoDB
         // const newSimulation = new Simulation(simulationData);
         // await newSimulation.save();
-
+        console.log("Simulation data: ", simulationData);
         return simulationData;
-    
+        
     } catch (e) {
         console.error('Error in SimulateMACrossover:', {
             message: e.message,
