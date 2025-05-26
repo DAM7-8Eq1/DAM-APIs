@@ -16,6 +16,10 @@ service SecurityRoute @(path:'/api/security') {
   @path: 'catalogsCompanie'
   function catalogsCompanie(labelid: String) returns array of CatalogWithValues;
 
+  @Core .Description: 'Creacion de catalogos'
+  @path: 'CreateCatalog'
+  action CreateCatalog(catalogs : Catalog) returns Catalog; 
+
   @Core.Description: 'Borrado lógico de catalogo'
   @path: 'deletecatalogs'
   action deletecatalogs(labelid: String) returns String;
