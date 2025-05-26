@@ -9,28 +9,32 @@ service SecurityRoute @(path: '/api/security') {
   entity CatalogWithValues as projection on s.CatalogWithValues;
 
   @Core.Description: 'Obtener catálogos. Filtra por labelid y valueid si se proporcionan (en el body de la petición)'
-  @path            : 'catalogs'
-  function catalogs(labelid : String, valueid : String)         returns array of CatalogWithValues;
+  @path: 'catalogs'
+  function catalogs(labelid: String, valueid: String) returns array of CatalogWithValues;
+  
+  @Core.Description: 'Obtener todos los catálogos'
+  @path: 'allCatalogs'
+  function allCatalogs() returns array of CatalogWithValues;
 
-  @Core.Description: 'Obtener catálogos de departametno por coamñia'
-  @path            : 'catalogsCompanie'
-  function catalogsCompanie(labelid : String)                   returns array of CatalogWithValues;
+  @Core.Description: 'Obtener catálogos de departametno por compañia'
+  @path: 'catalogsCompanie'
+  function catalogsCompanie(labelid: String) returns array of CatalogWithValues;
 
   @Core.Description: 'Creacion de catalogos'
   @path            : 'createcatalog'
   action   createcatalog(catalogs : Catalog)                    returns Catalog;
 
-  @Core.Description: 'Activar catálogo'
-  @path            : 'activatecatalogs'
-  action   activatecatalogs(labelid : String)                   returns String;
-
   @Core.Description: 'Borrado lógico de catalogo'
-  @path            : 'deletecatalogs'
-  action   deletecatalogs(labelid : String)                     returns String;
-
-  @Core.Description: 'Actualizacion de catalogo'
-  @path            : 'updatecatalogs'
-  action   updatecatalogs(labelid : String, catalogs : Catalog) returns Catalog;
+  @path: 'deletecatalogs'
+  action deletecatalogs(labelid: String) returns String;
+  
+  @Core.Description: 'Activado lógico de catalogo'
+  @path: 'activatecatalogs'
+  action activatecatalogs(labelid: String) returns String;  
+  
+  @Core .Description: 'Actualizacion de catalogo'
+  @path: 'updatecatalogs'
+  action updatecatalogs(labelid: String, catalogs : Catalog) returns Catalog; 
 
   @Core.Description: 'Eliminado físico de catalogo'
   @path            : 'removecatalog'

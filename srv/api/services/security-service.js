@@ -65,6 +65,16 @@ async function getAllCatalogsByLabelForCompanie(req) {
   };
 }
 
+async function getAllCatalogs() {
+  await connect();
+  const labels = await ZtLabel.find().lean();
+  return Promise.all(labels.map(async lbl => {
+    const vals = await ZtValue.find().lean();
+    return { ...lbl, VALUES: vals };
+  }));
+}
+
+
 async function CreateCatalog(req) {
   await connect();
   const catalogoPlano = JSON.parse(JSON.stringify(req.data.catalogs));
@@ -109,6 +119,22 @@ async function updateCatalog(req) {
       }
     );
     return ZtLabel.findOne({ LABELID: labelid }).lean() || 'Usuario no encontrado para borrado lógico';
+  }
+
+    async function logicalActivateCatalog(req) {
+    await connect();
+    const  labelid  = req._.req.query.labelid;
+    if (!labelid) {
+      throw new Error('No se proporcionó labelid en la query string');
+    }
+    await ZtLabel.updateOne(
+      { LABELID: labelid },
+      {
+        'DETAIL_ROW.ACTIVED': true,
+        'DETAIL_ROW.DELETED': false
+      }
+    );
+    return ZtLabel.findOne({ LABELID: labelid }).lean() || 'Usuario no encontrado para Activado lógico';
   }
 
   async function physicalDeleteCatalog(req) {
@@ -327,11 +353,13 @@ module.exports = {
   getAllCatalogsWithValues,
   getCatalogByLabel,
   getCatalogByLabelAndValue,
+  getAllCatalogs,
   CreateCatalog,
   catalogs,
   logicalDeleteCatalog,
   updateCatalog,
   physicalDeleteCatalog,
+  logicalActivateCatalog,
   getAllCatalogsByLabelForCompanie,
   // Usuarios
   getAllUsers,

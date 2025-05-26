@@ -8,12 +8,21 @@ class SecurityController extends cds.ApplicationService {
       return svc.catalogs(req);
     });
 
+    
+    this.on('allCatalogs', async () => {
+      return svc.getAllCatalogs();
+    });
+
     this.on('createcatalog', async (req) => {
       return svc.CreateCatalog(req);
     });
 
     this.on('deletecatalogs', async (req) => {
       return svc.logicalDeleteCatalog(req);
+    });
+
+    this.on('activatecatalogs', async (req) => {
+      return svc.logicalActivateCatalog(req);
     });
 
     
