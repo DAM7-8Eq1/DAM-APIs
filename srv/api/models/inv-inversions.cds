@@ -53,7 +53,7 @@ type SpecType : {
   VALUE     : Decimal(18,8);
 };
 
-entity simulation {
+entity SIMULATION {
     key IDSIMULATION       : String;              // "SOL_USDT_TBS_20240501_001"
         USERID             : String;              // "USER_TEST"
         IDSTRATEGY         : String;              // "TBS"
@@ -62,7 +62,7 @@ entity simulation {
         STARTDATE          : DateTime;            // "2024-05-01"
         ENDDATE            : DateTime;            // "2024-06-30"
         AMOUNT             : Decimal(18,8);       // "1000"
-        SPECS              : array of SpecType;              // "Donchian:20&RR:1.5"
+        SPECS              : array of SpecType;        
         RESULT             : Decimal(18,8);       // 30.00
         PERCENTAGERETURN   : Decimal(5,4);        // 0.03
         SIGNALS            : array of Signal;     // array de señales

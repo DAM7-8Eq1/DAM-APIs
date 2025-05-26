@@ -2,7 +2,7 @@
 const cds = require("@sap/cds");
 
 //2.-importar el servicio
-const { simulateSupertrend, reversionSimple } = require("../services/inv-inversions-service");
+const { simulateSupertrend, reversionSimple, SimulateMomentum, SimulateMACrossover } = require("../services/inv-inversions-service");
 
 //3.- estructura princiapl  de la clas de contorller
 
@@ -11,28 +11,24 @@ class inversionsClass extends cds.ApplicationService {
   async init() {
     this.on("getall", async (req) => {
       return GetAllPricesHistory(req);
-      //requesamso ala aruta
     });
 
     this.on("addone", async (req) => {
       return AddOnePricesHistory(req);
-      //requesamso ala aruta
     });
 
     this.on("updateone", async (req) => {
       return UpdateOnePricesHistory(req);
-      //requesamso ala aruta
     });
 
     this.on("deleteone", async (req) => {
       return DeleteOnePricesHistory(req);
-      //requesamso ala aruta
     });
 
     this.on("simulation", async (req) => {
       try {
         const { strategy } = req?.req?.query || {};
-        const body = req?.req?.body?.simulation || {}; // Aquí está todo el body
+        const body = req?.req?.body?.SIMULATION || {}; 
         console.log(body);
 
         if (!strategy) {
@@ -45,37 +41,29 @@ class inversionsClass extends cds.ApplicationService {
             "El cuerpo de la solicitud no puede estar vacío. Se esperan parámetros de simulación."
           );
         }
-
-        let result = "";
         switch (strategy.toLowerCase()) {
-          case "reversionsimple":
+            case "reversionsimple":
+              return await reversionSimple(body);
 
-            result = await reversionSimple(body);
+            case "supertrend":
+              return await simulateSupertrend(body);
 
-            return result; 
-           case "supertrend":
+            case "momentum":
+              return await SimulateMomentum(body);
 
-            result = await simulateSupertrend(body);
-
-            return result; 
-
-          // Aquí puedes agregar más estrategias en el futuro:
-          // case 'otraEstrategia':
-          //   return await otraFuncionDeEstrategia(body);
-
+            case "macrossover":
+              return await SimulateMACrossover(body);
           default:
             throw new Error(`Estrategia no reconocida: ${strategy}`);
         }
       } catch (error) {
         console.error("Error en el controlador de simulación:", error);
-        // Retorna un objeto de error que el framework pueda serializar a JSON.
         return {
           ERROR: true,
           MESSAGE:
             error.message || "Error al procesar la solicitud de simulación.",
         };
       }
-      // );
     });
     return await super.init();
   }
