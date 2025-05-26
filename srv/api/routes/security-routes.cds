@@ -20,6 +20,12 @@ service SecurityRoute @(path:'/api/security') {
   @path: 'catalogsCompanie'
   function catalogsCompanie(labelid: String) returns array of CatalogWithValues;
 
+  
+  @Core.Description: 'Crear valor en un catálogo'
+  @path: 'CreateValue'
+  action CreateValue(value: Value) returns Value;
+
+  
   @Core .Description: 'Creacion de catalogos'
   @path: 'CreateCatalog'
   action CreateCatalog(catalogs : Catalog) returns Catalog; 

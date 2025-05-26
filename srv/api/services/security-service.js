@@ -74,6 +74,12 @@ async function getAllCatalogs() {
   }));
 }
 
+async function CreateValue(req) {
+  await connect();
+  const valuePlano = JSON.parse(JSON.stringify(req.data.value));
+  const nuevoValor = await ZtValue.create(valuePlano);  
+  return JSON.parse(JSON.stringify(nuevoValor));
+}
 
 async function CreateCatalog(req) {
   await connect();
@@ -355,6 +361,7 @@ module.exports = {
   getCatalogByLabelAndValue,
   getAllCatalogs,
   CreateCatalog,
+  CreateValue,
   catalogs,
   logicalDeleteCatalog,
   updateCatalog,
