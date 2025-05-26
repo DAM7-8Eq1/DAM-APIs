@@ -50,6 +50,44 @@ async function getCatalogByLabelAndValue(req) {
   };
 }
 
+
+async function getAllCatalogsByLabelForCompanie(req) {
+    await connect();
+  const { labelid } = req.data;
+  if (!labelid) return null;
+
+  const value = await ZtValue.find({ VALUEPAID:  "IdCompanies-"+labelid }).lean();
+  if (!value) return null;
+
+
+  return {
+   value
+  };
+}
+
+async function getAllCatalogs() {
+  await connect();
+  const labels = await ZtLabel.find().lean();
+  return Promise.all(labels.map(async lbl => {
+    const vals = await ZtValue.find().lean();
+    return { ...lbl, VALUES: vals };
+  }));
+}
+
+async function CreateValue(req) {
+  await connect();
+  const valuePlano = JSON.parse(JSON.stringify(req.data.value));
+  const nuevoValor = await ZtValue.create(valuePlano);  
+  return JSON.parse(JSON.stringify(nuevoValor));
+}
+
+async function CreateCatalog(req) {
+  await connect();
+  const catalogoPlano = JSON.parse(JSON.stringify(req.data.catalogs));
+  const nuevoCatalogo = await ZtLabel.create(catalogoPlano);
+  return JSON.parse(JSON.stringify(nuevoCatalogo));
+}
+
 async function catalogs(req) {
   const { labelid, valueid } = req.data || {};
   if (labelid && valueid) {
@@ -89,6 +127,22 @@ async function updateCatalog(req) {
     return ZtLabel.findOne({ LABELID: labelid }).lean() || 'Usuario no encontrado para borrado lógico';
   }
 
+    async function logicalActivateCatalog(req) {
+    await connect();
+    const  labelid  = req._.req.query.labelid;
+    if (!labelid) {
+      throw new Error('No se proporcionó labelid en la query string');
+    }
+    await ZtLabel.updateOne(
+      { LABELID: labelid },
+      {
+        'DETAIL_ROW.ACTIVED': true,
+        'DETAIL_ROW.DELETED': false
+      }
+    );
+    return ZtLabel.findOne({ LABELID: labelid }).lean() || 'Usuario no encontrado para Activado lógico';
+  }
+
   async function physicalDeleteCatalog(req) {
     await connect();
     const labelid = req._.req.query.labelid;
@@ -115,6 +169,14 @@ async function getUserById(req) {
   if (!userid) return null;
   return ZtUser.findOne({ USERID: userid }).lean();
 }
+
+async function getUserByEmail(req) {
+  await connect();
+  const { email } = req.data;
+  if (!email) return null;
+  return ZtUser.findOne({ EMAIL: email }).lean();
+}
+
 
 async function createUser(req) {
   await connect();
@@ -297,13 +359,19 @@ module.exports = {
   getAllCatalogsWithValues,
   getCatalogByLabel,
   getCatalogByLabelAndValue,
+  getAllCatalogs,
+  CreateCatalog,
+  CreateValue,
   catalogs,
   logicalDeleteCatalog,
   updateCatalog,
   physicalDeleteCatalog,
+  logicalActivateCatalog,
+  getAllCatalogsByLabelForCompanie,
   // Usuarios
   getAllUsers,
   getUserById,
+  getUserByEmail,
   getAllUsersDesactive,
   createUser,
   updateUser,

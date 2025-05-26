@@ -11,10 +11,32 @@ service SecurityRoute @(path:'/api/security') {
   @Core.Description: 'Obtener catálogos. Filtra por labelid y valueid si se proporcionan (en el body de la petición)'
   @path: 'catalogs'
   function catalogs(labelid: String, valueid: String) returns array of CatalogWithValues;
+  
+  @Core.Description: 'Obtener todos los catálogos'
+  @path: 'allCatalogs'
+  function allCatalogs() returns array of CatalogWithValues;
+
+  @Core.Description: 'Obtener catálogos de departametno por compañia'
+  @path: 'catalogsCompanie'
+  function catalogsCompanie(labelid: String) returns array of CatalogWithValues;
+
+  
+  @Core.Description: 'Crear valor en un catálogo'
+  @path: 'CreateValue'
+  action CreateValue(value: Value) returns Value;
+
+  
+  @Core .Description: 'Creacion de catalogos'
+  @path: 'CreateCatalog'
+  action CreateCatalog(catalogs : Catalog) returns Catalog; 
 
   @Core.Description: 'Borrado lógico de catalogo'
   @path: 'deletecatalogs'
   action deletecatalogs(labelid: String) returns String;
+  
+  @Core.Description: 'Activado lógico de catalogo'
+  @path: 'activatecatalogs'
+  action activatecatalogs(labelid: String) returns String;  
   
   @Core .Description: 'Actualizacion de catalogo'
   @path: 'updatecatalogs'
@@ -28,11 +50,15 @@ service SecurityRoute @(path:'/api/security') {
   @Core.Description: 'Obtener usuarios o usuario por ID (en el body se envía userid)'
   @path: 'users'
   function users(userid: String) returns array of User;
+  
+  @Core.Description: 'Obtener usuarios por el correo electrónico'
+  @path: 'userEmail'
+  function userEmail(email: String) returns array of User;
 
   @Core.Description: 'Obtener usuarios auqnue esten desactivados'
   @path: 'usersAll'
   function usersAll(userid: String) returns array of User;
-  
+
   @Core.Description: 'Crear usuario'
   @path: 'createuser'
   action createuser(user: User) returns User;

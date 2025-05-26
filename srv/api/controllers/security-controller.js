@@ -8,8 +8,25 @@ class SecurityController extends cds.ApplicationService {
       return svc.catalogs(req);
     });
 
+    
+    this.on('allCatalogs', async () => {
+      return svc.getAllCatalogs();
+    });
+
+    this.on('CreateCatalog', async (req) => {
+      return svc.CreateCatalog(req);
+    });
+
+    this.on('CreateValue', async (req) => {
+      return svc.CreateValue(req);
+    });
+
     this.on('deletecatalogs', async (req) => {
       return svc.logicalDeleteCatalog(req);
+    });
+
+    this.on('activatecatalogs', async (req) => {
+      return svc.logicalActivateCatalog(req);
     });
 
     
@@ -21,6 +38,11 @@ class SecurityController extends cds.ApplicationService {
       return svc.physicalDeleteCatalog(req);
     });
 
+    
+    this.on('catalogsCompanie', async (req) => {
+      return svc.getAllCatalogsByLabelForCompanie(req);
+    });   
+
     // ─── USUARIOS ─────────────────────────────
     // GET: Obtener usuarios o un usuario específico (según query param "userid")
     this.on('users', async (req) => {
@@ -29,6 +51,10 @@ class SecurityController extends cds.ApplicationService {
     
     this.on('usersAll', async (req) => {
       return svc.getAllUsersDesactive(req);
+    });
+    // GET: Obtener un usuario por su email
+    this.on('userEmail', async (req) => {
+      return svc.getUserByEmail(req);
     });
 
     // POST: Crear usuario
