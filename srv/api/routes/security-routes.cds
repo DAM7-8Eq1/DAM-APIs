@@ -11,8 +11,12 @@ service SecurityRoute @(path:'/api/security') {
   @Core.Description: 'Obtener catálogos. Filtra por labelid y valueid si se proporcionan (en el body de la petición)'
   @path: 'catalogs'
   function catalogs(labelid: String, valueid: String) returns array of CatalogWithValues;
+  
+  @Core.Description: 'Obtener todos los catálogos'
+  @path: 'allCatalogs'
+  function allCatalogs() returns array of CatalogWithValues;
 
-  @Core.Description: 'Obtener catálogos de departametno por coamñia'
+  @Core.Description: 'Obtener catálogos de departametno por compañia'
   @path: 'catalogsCompanie'
   function catalogsCompanie(labelid: String) returns array of CatalogWithValues;
 
@@ -23,6 +27,10 @@ service SecurityRoute @(path:'/api/security') {
   @Core.Description: 'Borrado lógico de catalogo'
   @path: 'deletecatalogs'
   action deletecatalogs(labelid: String) returns String;
+  
+  @Core.Description: 'Activado lógico de catalogo'
+  @path: 'activatecatalogs'
+  action activatecatalogs(labelid: String) returns String;  
   
   @Core .Description: 'Actualizacion de catalogo'
   @path: 'updatecatalogs'
