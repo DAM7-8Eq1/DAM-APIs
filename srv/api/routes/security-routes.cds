@@ -19,13 +19,28 @@ service SecurityRoute @(path:'/api/security') {
   @Core.Description: 'Obtener catálogos de departametno por compañia'
   @path: 'catalogsCompanie'
   function catalogsCompanie(labelid: String) returns array of CatalogWithValues;
-
   
   @Core.Description: 'Crear valor en un catálogo'
   @path: 'CreateValue'
   action CreateValue(value: Value) returns Value;
 
+  @Core.Description: 'Crear valor en un catálogo'
+  @path: 'updateValue'
+  action updateValue(valueid:String, value: Value) returns Value;
   
+  @Core.Description: 'Elimnar fisicamente un valor en un catálogo'
+  @path: 'physicalDeleteValue'
+  action physicalDeleteValue(valueid:String)  returns String;
+  
+  @Core.Description: 'Eliminar Logicamente valor en un catálogo'
+  @path: 'logicalDeleteValue'
+  action logicalDeleteValue(valueid:String) returns Value;
+  
+  @Core.Description: 'Activar Logicamnete un valor en un catálogo'
+  @path: 'logicalActivateValue'
+  action logicalActivateValue(valueid:String) returns Value;
+
+
   @Core .Description: 'Creacion de catalogos'
   @path: 'CreateCatalog'
   action CreateCatalog(catalogs : Catalog) returns Catalog; 

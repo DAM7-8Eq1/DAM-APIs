@@ -81,6 +81,63 @@ async function CreateValue(req) {
   return JSON.parse(JSON.stringify(nuevoValor));
 }
 
+async function updateValue(req) {
+    await connect();
+    const valueid = req._.req.query.valueid;
+    if (!valueid) {
+      throw new Error('No se proporcionó labelid en la query string');
+    }
+    const valuePayload = req.data.value;
+    await ZtValue.updateOne({ VALUEID: valueid }, valuePayload);
+    return ZtValue.findOne({ VALUEID: valueid }).lean();
+}
+
+ async function logicalDeleteValue(req) {
+    await connect();
+    const  valueid  = req._.req.query.valueid;
+    if (!valueid) {
+      throw new Error('No se proporcionó labelid en la query string');
+    }
+    await ZtValue.updateOne(
+      { VALUEID: valueid },
+      {
+        'DETAIL_ROW.ACTIVED': false,
+        'DETAIL_ROW.DELETED': true
+      }
+    );
+    return ZtValue.findOne({ VALUEID: valueid }).lean() || 'Value no encontrado para borrado lógico';
+  }
+ async function logicalActivateValue(req) {
+    await connect();
+    const  valueid  = req._.req.query.valueid;
+    if (!valueid) {
+      throw new Error('No se proporcionó labelid en la query string');
+    }
+    await ZtValue.updateOne(
+      { VALUEID: valueid },
+      {
+        'DETAIL_ROW.ACTIVED': true,
+        'DETAIL_ROW.DELETED': false
+      }
+    );
+    return ZtValue.findOne({ VALUEID: valueid }).lean() || 'Value no encontrado para borrado lógico';
+  }
+
+  async function physicalDeleteValue(req) {
+    await connect();
+    const valueid = req._.req.query.valueid;
+    if (!valueid) {
+      throw new Error('No se proporcionó labelid en la query string');
+    }
+    const result = await ZtValue.deleteOne({ VALUEID: valueid });
+    
+ return result.deletedCount === 1 ? 'Borrado físicamente' : 'Usuario no encontrado para borrado físico';
+  }
+
+
+
+
+
 async function CreateCatalog(req) {
   await connect();
   const catalogoPlano = JSON.parse(JSON.stringify(req.data.catalogs));
@@ -363,6 +420,10 @@ module.exports = {
   CreateCatalog,
   CreateValue,
   catalogs,
+  physicalDeleteValue,
+  logicalDeleteValue,
+  logicalActivateValue,
+  updateValue,
   logicalDeleteCatalog,
   updateCatalog,
   physicalDeleteCatalog,
