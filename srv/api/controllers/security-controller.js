@@ -120,6 +120,10 @@ class SecurityController extends cds.ApplicationService {
       return svc.physicalDeleteRole(req);
     });
 
+    this.on('activaterole', async (req) => {
+      return svc.logicalActivateRole(req);
+    });
+
     // ─── VISTAS ─────────────────────────────
     this.on('createview', async (req) => {
       // Se puede implementar la lógica real; por el momento se retorna un stub.
@@ -146,6 +150,10 @@ class SecurityController extends cds.ApplicationService {
       } else {
         return { message: 'deleteprocess no implementado' };
       }
+    });
+
+    this.on('userEmail', async (req) => {
+      return svc.userEmail(req);
     });
 
     return await super.init();

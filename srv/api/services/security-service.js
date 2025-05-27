@@ -390,17 +390,30 @@ async function users(req) {
   }
 }
 
+async function userEmail(req) {
+  await connect();
+  const { email } = req.data;
+  if (!email) return [];
+  const user = await ZtUser.findOne({ EMAIL: email }).lean();
+  return user ? [user] : [];
+}
+
 // ─── Funciones para Roles ────────────────────────────────
 async function getAllRoles() {
   await connect();
-  return ZtRole.find({ 'DETAIL_ROW.ACTIVED': true }).lean();
+  // Trae todos los roles, sin filtrar por ACTIVED
+  const roles = await ZtRole.find({}).lean();
+  return roles;
 }
 
 async function getRoleById(req) {
   await connect();
   const { roleid } = req.data;
   if (!roleid) return null;
-  return ZtRole.findOne({ ROLEID: roleid }).lean();
+  //guardamos los roles en una variable aunque se puede hacer directo lo hacemos asi para que sea mas legible
+  const role = await ZtRole.findOne({ ROLEID: roleid }).lean();
+  //la retornamos
+  return role;
 }
 
 async function getUsersByRole(req) {
@@ -423,7 +436,6 @@ async function createRole(req) {
 
   // Aquí podrías validar procesos y privilegios antes de crear
   const nuevoRol = await ZtRole.create(rolePlano);
-
   return JSON.parse(JSON.stringify(nuevoRol));
 }
 
@@ -442,9 +454,9 @@ async function updateRole(req) {
 
 async function logicalDeleteRole(req) {
   await connect();
-  const roleid = req._.req.query.roleid;
+  const roleid = req.data.roleid;
   if (!roleid) {
-    throw new Error('No se proporcionó roleid en la query string');
+    throw new Error('No se proporcionó roleid en el body');
   }
   await ZtRole.updateOne(
     { ROLEID: roleid },
@@ -458,9 +470,9 @@ async function logicalDeleteRole(req) {
 
 async function logicalActivateRole(req) {
   await connect();
-  const roleid = req._.req.query.roleid;
+  const roleid = req.data.roleid;
   if (!roleid) {
-    throw new Error('No se proporcionó roleid en la query string');
+    throw new Error('No se proporcionó roleid en el body');
   }
   await ZtRole.updateOne(
     { ROLEID: roleid },
@@ -525,6 +537,7 @@ module.exports = {
   logicalActivateUser,
   physicalDeleteUser,
   users,
+  userEmail,
   // Roles
   getAllRoles,
   getRoleById,

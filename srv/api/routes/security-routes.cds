@@ -95,6 +95,10 @@ service SecurityRoute @(path:'/api/security') {
   @path: 'removeuser'
   action removeuser(userid: String) returns String;
 
+  @Core.Description: 'Obtener usuario por email'
+  @path: 'userEmail'
+  function userEmail(email: String) returns array of User;
+
   // ─── ROLES ─────────────────────────────────────────
   entity Role as projection on s.Role;
   @Core.Description: 'Obtener roles o un rol por ID (con usuarios asociados si se envía roleid)'
@@ -116,6 +120,10 @@ service SecurityRoute @(path:'/api/security') {
   @Core.Description: 'Eliminado físico de rol'
   @path: 'removerole'
   action removerole(roleid: String) returns String;
+
+  @Core.Description: 'Activado lógico de rol'
+  @path: 'activaterole'
+  action activaterole(roleid: String) returns String;
 
   // ─── VISTAS ─────────────────────────────────────────
   entity View  as projection on s.View;
