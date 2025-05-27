@@ -12,7 +12,7 @@ using {inv as myinv} from '../models/inv-inversions';
 service InversionsRoute @(path:'/api/inv'){
 
 
-    entity entsimulation as projection on myinv.simulation;
+    entity entsimulation as projection on myinv.SIMULATION;
     entity priceshistory as projection on myinv.priceshistory;
     entity strategies as projection on myinv.strategies;
 
@@ -39,7 +39,7 @@ service InversionsRoute @(path:'/api/inv'){
     returns array of priceshistory;
 
     @path: 'simulation'
-    action simulation(simulation : entsimulation) returns array of entsimulation;
+    action simulation(SIMULATION : entsimulation) returns array of entsimulation;
 };
 
 
