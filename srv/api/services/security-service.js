@@ -249,38 +249,108 @@ async function updateUser(req) {
     throw new Error('No se proporcionó userid en la query string');
   }
   const userPayload = req.data.user;
-  await ZtUser.updateOne({ USERID: userid }, userPayload);
+  const usaurio = req._.req.query.usermod;
+  const now = new Date().toISOString();
+
+   // Obtener el usuario actual para manipular DETAIL_ROW_REG dentro de DETAIL_ROW
+  const userDb = await ZtUser.findOne({ USERID: userid }).lean();
+  let detailRowReg = [];
+
+  if (userDb && userDb.DETAIL_ROW && Array.isArray(userDb.DETAIL_ROW.DETAIL_ROW_REG)) {
+    // Cambiar todos los CURRENT existentes a false
+    detailRowReg = userDb.DETAIL_ROW.DETAIL_ROW_REG.map(reg => ({ ...reg, CURRENT: false }));
+  }
+
+  // Agregar el nuevo registro al final
+  detailRowReg.push({
+    CURRENT: true,
+    REGDATE: now,
+    REGTIME: now,
+    REGUSER: usaurio
+  });
+
+  // Asegura que DETAIL_ROW sea un objeto
+  if (!userPayload.DETAIL_ROW || typeof userPayload.DETAIL_ROW !== 'object') userPayload.DETAIL_ROW = {};
+  userPayload.DETAIL_ROW.DETAIL_ROW_REG = detailRowReg;
+
+  await ZtUser.updateOne({ USERID: userid }, { $set: userPayload });
   return ZtUser.findOne({ USERID: userid }).lean();
 }
 
 async function logicalDeleteUser(req) {
-  await connect();
+   await connect();
   const userid = req._.req.query.userid;
   if (!userid) {
     throw new Error('No se proporcionó userid en la query string');
   }
+  const usaurio = req._.req.query.usermod;
+  const now = new Date().toISOString();
+
+  // Obtener el usuario actual para manipular DETAIL_ROW_REG dentro de DETAIL_ROW
+  const userDb = await ZtUser.findOne({ USERID: userid }).lean();
+  let detailRowReg = [];
+
+  if (userDb && userDb.DETAIL_ROW && Array.isArray(userDb.DETAIL_ROW.DETAIL_ROW_REG)) {
+    // Cambiar todos los CURRENT existentes a false
+    detailRowReg = userDb.DETAIL_ROW.DETAIL_ROW_REG.map(reg => ({ ...reg, CURRENT: false }));
+  }
+
+  // Agregar el nuevo registro al final
+  detailRowReg.push({
+    CURRENT: true,
+    REGDATE: now,
+    REGTIME: now,
+    REGUSER: usaurio
+  });
+
+  // Construir el payload para actualizar
+  const userPayload = {};
+  userPayload['DETAIL_ROW.DETAIL_ROW_REG'] = detailRowReg;
+  userPayload['DETAIL_ROW.ACTIVED'] = false;
+  userPayload['DETAIL_ROW.DELETED'] = true;
+
   await ZtUser.updateOne(
     { USERID: userid },
-    {
-      'DETAIL_ROW.ACTIVED': false,
-      'DETAIL_ROW.DELETED': true
-    }
+    { $set: userPayload }
   );
-  return ZtUser.findOne({ USERID: userid }).lean() || 'Usuario no encontrado para borrado lógico';
+  return ZtUser.findOne({ USERID: userid }).lean() || 'Usuario no encontrado para activado lógico';
 }
 
 async function logicalActivateUser(req) {
-  await connect();
+   await connect();
   const userid = req._.req.query.userid;
   if (!userid) {
     throw new Error('No se proporcionó userid en la query string');
   }
+  const usaurio = req._.req.query.usermod;
+  const now = new Date().toISOString();
+
+  // Obtener el usuario actual para manipular DETAIL_ROW_REG dentro de DETAIL_ROW
+  const userDb = await ZtUser.findOne({ USERID: userid }).lean();
+  let detailRowReg = [];
+
+  if (userDb && userDb.DETAIL_ROW && Array.isArray(userDb.DETAIL_ROW.DETAIL_ROW_REG)) {
+    // Cambiar todos los CURRENT existentes a false
+    detailRowReg = userDb.DETAIL_ROW.DETAIL_ROW_REG.map(reg => ({ ...reg, CURRENT: false }));
+  }
+
+  // Agregar el nuevo registro al final
+  detailRowReg.push({
+    CURRENT: true,
+    REGDATE: now,
+    REGTIME: now,
+    REGUSER: usaurio
+  });
+
+  // Construir el payload para actualizar
+  const userPayload = {};
+  userPayload['DETAIL_ROW.DETAIL_ROW_REG'] = detailRowReg;
+  userPayload['DETAIL_ROW.ACTIVED'] = true;
+  userPayload['DETAIL_ROW.DELETED'] = false;
+
   await ZtUser.updateOne(
     { USERID: userid },
-    {
-      'DETAIL_ROW.ACTIVED': true,
-      'DETAIL_ROW.DELETED': false
-    }
+    { $set: userPayload }
   );
   return ZtUser.findOne({ USERID: userid }).lean() || 'Usuario no encontrado para activado lógico';
 }

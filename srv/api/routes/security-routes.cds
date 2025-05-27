@@ -80,15 +80,15 @@ service SecurityRoute @(path:'/api/security') {
   
   @Core.Description: 'Actualizar usuario'
   @path: 'updateuser'
-  action updateuser(userid: String, user: User) returns User;
+  action updateuser(userid: String,usermod:String, user: User) returns User;
   
   @Core.Description: 'Borrado lógico de usuario'
   @path: 'deleteusers'
-  action deleteusers(userid: String) returns String;
+  action deleteusers(userid: String,usermod:String) returns String;
 
   @Core.Description: 'activado lógico de usuario'
   @path: 'activateusers'
-  action activateusers(userid: String) returns String;
+  action activateusers(userid: String,usermod:String) returns String;
   
 
   @Core.Description: 'Eliminado físico de usuario'
