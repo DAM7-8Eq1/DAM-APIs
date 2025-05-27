@@ -76,7 +76,7 @@ service SecurityRoute @(path:'/api/security') {
 
   @Core.Description: 'Crear usuario'
   @path: 'createuser'
-  action createuser(user: User) returns User;
+  action createuser(usermod:String,user: User) returns User;
   
   @Core.Description: 'Actualizar usuario'
   @path: 'updateuser'

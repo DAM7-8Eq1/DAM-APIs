@@ -238,6 +238,20 @@ async function getUserByEmail(req) {
 async function createUser(req) {
   await connect();
   const usuarioPlano = JSON.parse(JSON.stringify(req.data.user));
+  const usaurio = req._.req.query.usermod || usuarioPlano.USERID || 'SYSTEM';
+  const now = new Date().toISOString();
+
+  // Crear el historial inicial
+  usuarioPlano.DETAIL_ROW = usuarioPlano.DETAIL_ROW || {};
+  usuarioPlano.DETAIL_ROW.DETAIL_ROW_REG = [
+    {
+      CURRENT: true,
+      REGDATE: now,
+      REGTIME: now,
+      REGUSER: usaurio
+    }
+  ];
+
   const nuevoUsuario = await ZtUser.create(usuarioPlano);
   return JSON.parse(JSON.stringify(nuevoUsuario));
 }
