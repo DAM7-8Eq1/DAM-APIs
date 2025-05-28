@@ -2,7 +2,7 @@
 const cds = require("@sap/cds");
 
 //2.-importar el servicio
-const { simulateSupertrend, reversionSimple, SimulateMomentum, SimulateMACrossover } = require("../services/inv-inversions-service");
+const { simulateSupertrend, reversionSimple, SimulateMomentum, SimulateMACrossover, getSimulationHistory, updateSimulation, deleteSimulation } = require("../services/inv-inversions-service");
 
 //3.- estructura princiapl  de la clas de contorller
 
@@ -23,6 +23,18 @@ class inversionsClass extends cds.ApplicationService {
 
     this.on("deleteone", async (req) => {
       return DeleteOnePricesHistory(req);
+    });
+
+    this.on("history", async (req) => {
+      return getSimulationHistory(req);
+    });
+
+    this.on("updatesimulation", async (req) => {
+      return updateSimulation(req);
+    });
+
+    this.on("deletesimulation", async (req) => {
+      return deleteSimulation(req);
     });
 
     this.on("simulation", async (req) => {

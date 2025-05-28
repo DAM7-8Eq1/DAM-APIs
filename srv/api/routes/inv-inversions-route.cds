@@ -34,12 +34,21 @@ service InversionsRoute @(path:'/api/inv'){
     returns array of priceshistory;
 
     @Core.Description: 'delete-one-prices-history'
-    @path :'delteone'
+    @path :'deleteone'
     function deleteone(prices : priceshistory)
     returns array of priceshistory;
 
     @path: 'simulation'
     action simulation(SIMULATION : entsimulation) returns array of entsimulation;
+
+    @path: 'history'
+    function history() returns array of entsimulation;
+
+    @path: 'updatesimulation'
+    action updatesimulation(SIMULATION : entsimulation) returns array of entsimulation;
+
+    @path: 'deletesimulation'
+    action deletesimulation(SIMULATIONIDS: Array of String) returns array of entsimulation;
 };
 
 

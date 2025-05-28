@@ -54,8 +54,9 @@ type SpecType : {
 };
 
 entity SIMULATION {
-    key IDSIMULATION       : String;              // "SOL_USDT_TBS_20240501_001"
+    key SIMULATIONID       : String;              // "SOL_USDT_TBS_20240501_001"
         USERID             : String;              // "USER_TEST"
+        NEWID              : String;
         IDSTRATEGY         : String;              // "TBS"
         SIMULATIONNAME     : String;              // "Turtle Soup Swing SOL/USDT"
         SYMBOL             : String;              // "SOL_USDT"
