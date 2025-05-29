@@ -66,9 +66,6 @@ service SecurityRoute @(path:'/api/security') {
   @path: 'users'
   function users(userid: String) returns array of User;
   
-  @Core.Description: 'Obtener usuarios por el correo electrónico'
-  @path: 'userEmail'
-  function userEmail(email: String) returns array of User;
 
   @Core.Description: 'Obtener usuarios auqnue esten desactivados'
   @path: 'usersAll'

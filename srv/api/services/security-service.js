@@ -497,12 +497,8 @@ async function physicalDeleteRole(req) {
 async function roles(req) {
   const { roleid } = req.data || {};
   if (roleid && roleid.trim() !== '') {
-    // Para operaciones GET compuestas: leemos roleid de req.data
     const role = await getRoleById(req);
-    if (!role) return null;
-    const usersArr = await getUsersByRole(req);
-    role.USERS = usersArr;
-    return role;
+    return role ? [role] : [];
   } else {
     return getAllRoles();
   }
