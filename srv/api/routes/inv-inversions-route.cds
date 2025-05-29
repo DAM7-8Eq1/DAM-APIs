@@ -14,7 +14,6 @@ service InversionsRoute @(path:'/api/inv'){
 
     entity entsimulation as projection on myinv.SIMULATION;
     entity priceshistory as projection on myinv.priceshistory;
-    entity strategies as projection on myinv.strategies;
 
 
     @Core.Description: 'get-all-prices-history'
@@ -43,6 +42,9 @@ service InversionsRoute @(path:'/api/inv'){
 
     @path: 'history'
     function history() returns array of entsimulation;
+
+    @path: 'simulationbyid'
+    action simulationbyid(SIMULATIONID : String) returns entsimulation;
 
     @path: 'updatesimulation'
     action updatesimulation(SIMULATION : entsimulation) returns array of entsimulation;

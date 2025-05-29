@@ -386,6 +386,47 @@ async function getSimulationHistory(req) {
     req.error({ code: 500, message: "Error al obtener historial de simulaciones" });
   }
 }
+
+async function getSimulationById(req) {
+  const SIMULATIONID  = req.data.SIMULATIONID;   
+  try {
+    // 1) Busca la simulación específica
+    const sim = await mongoose
+      .connection
+      .collection('SIMULATION')
+      .findOne({ SIMULATIONID });
+
+    if (!sim) {
+      // Si no existe, devolvemos un 404
+      return req.error({ code: 404, message: `Simulación ${SIMULATIONID} no encontrada` });
+    }
+
+    // 2) Construye el objeto con toda la info necesaria
+    const simulationData = {
+      SIMULATIONID:   sim.SIMULATIONID,
+      USERID:         sim.USERID,
+      STRATEGYID:     sim.STRATEGYID,
+      SIMULATIONNAME: sim.SIMULATIONNAME,
+      SYMBOL:         sim.SYMBOL,
+      INDICATORS:     { value: sim.SPECS || [] },
+      AMOUNT:         parseFloat((sim.AMOUNT ?? 0).toFixed(2)),
+      SUMMARY:        sim.SUMMARY      || {},
+      STARTDATE:      sim.STARTDATE,
+      ENDDATE:        sim.ENDDATE,
+      SIGNALS:        sim.SIGNALS      || [],
+      CHART_DATA:     sim.CHART_DATA   || [],
+      DETAIL_ROW:     sim.DETAIL_ROW   || {}
+    };
+    console.log("SimulationData: ",simulationData);
+    // 3) Retornamos el objeto y CDS lo convertirá a JSON
+    return simulationData;
+
+  } catch (err) {
+    // Error interno
+    return req.error({ code: 500, message: 'Error al obtener simulación por ID', target: err.message });
+  }
+}
+
 async function updateSimulation(req) {
   // 1) Extraemos el arreglo de simulaciones desde req.data
   const sims = req.data.SIMULATION;
@@ -1821,6 +1862,7 @@ module.exports = {
   UpdateOnePricesHistory,
   DeleteOnePricesHistory,
   getSimulationHistory,
+  getSimulationById,
   simulateSupertrend,
   reversionSimple,
   updateSimulation,
