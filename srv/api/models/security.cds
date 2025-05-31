@@ -74,7 +74,7 @@ entity User {
     FIRSTNAME      : String;
     LASTNAME       : String;
     BIRTHDAYDATE   : String;
-    COMPANYID      : Integer;
+    COMPANYID      : String;
     COMPANYNAME    : String;
     COMPANYALIAS   : String;
     CEDIID         : String;

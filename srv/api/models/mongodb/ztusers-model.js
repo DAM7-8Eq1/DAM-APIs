@@ -8,7 +8,7 @@ const ZtUserSchema = new Schema({
   FIRSTNAME:    { type: String },
   LASTNAME:     { type: String },
   BIRTHDAYDATE: { type: String },
-  COMPANYID:    { type: Number },
+  COMPANYID:    { type: String },
   COMPANYNAME:  { type: String },
   COMPANYALIAS: { type: String },
   CEDIID:       { type: String },
