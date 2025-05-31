@@ -263,6 +263,7 @@ async function updateUser(req) {
     throw new Error('No se proporcionó userid en la query string');
   }
   const userPayload = req.data.user;
+  const userVerification = req.data.user.USERID;
   const usaurio = req._.req.query.usermod;
   const now = new Date().toISOString();
 
@@ -288,7 +289,7 @@ async function updateUser(req) {
   userPayload.DETAIL_ROW.DETAIL_ROW_REG = detailRowReg;
 
   await ZtUser.updateOne({ USERID: userid }, { $set: userPayload });
-  return ZtUser.findOne({ USERID: userid }).lean();
+  return ZtUser.findOne({ USERID: userVerification }).lean();
 }
 
 async function logicalDeleteUser(req) {
