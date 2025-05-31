@@ -157,4 +157,8 @@ service SecurityRoute @(path:'/api/security') {
   @Core.Description: 'Eliminado físico de proceso'
   @path: 'removeprocess'
   action removeprocess(valueid: String) returns String;
+
+  @Core.Description: 'Obtener todos los labels de ZTLABELS'
+  @path: 'getAllZtlabels'
+  function getAllZtlabels() returns array of Catalog;
 }

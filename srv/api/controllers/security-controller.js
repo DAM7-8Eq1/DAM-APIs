@@ -156,6 +156,10 @@ class SecurityController extends cds.ApplicationService {
       return svc.userEmail(req);
     });
 
+    this.on('getAllZtlabels', async (req) => {
+      return svc.getAllZtlabels();
+    });
+
     return await super.init();
   }
 }

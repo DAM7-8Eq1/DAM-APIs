@@ -503,6 +503,13 @@ async function roles(req) {
     return getAllRoles();
   }
 }
+// Funciones para ZTLABELS
+
+
+async function getAllZtlabels() {
+  await connect();
+  return await ZtLabel.find({ 'DETAIL_ROW.ACTIVED': true }).lean();
+}
 
 module.exports = {
   // Catálogos
@@ -543,5 +550,6 @@ module.exports = {
   logicalDeleteRole,
   logicalActivateRole,
   physicalDeleteRole,
-  roles
+  roles,
+  getAllZtlabels,
 };

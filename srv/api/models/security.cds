@@ -110,6 +110,7 @@ entity Role {
     ROLENAME      : String;
     DESCRIPTION   : String;
     // Ahora un arreglo de estructuras en lugar de String
+    APP: String;
     PRIVILEGES    : Array of PrivilegeData;
     DETAIL_ROW    : DetailRow;
 }
@@ -146,3 +147,4 @@ entity View {
     ROUTE       : String;
     DETAIL_ROW  : DetailRow;
 }
+
