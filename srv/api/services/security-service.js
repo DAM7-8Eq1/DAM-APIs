@@ -265,9 +265,10 @@ async function updateUser(req) {
   const userPayload = req.data.user;
   const usaurio = req._.req.query.usermod;
   const now = new Date().toISOString();
-
+  console.log("User ayload", userPayload);
    // Obtener el usuario actual para manipular DETAIL_ROW_REG dentro de DETAIL_ROW
   const userDb = await ZtUser.findOne({ USERID: userid }).lean();
+  console.log("Usuario actual: ",userDb);
   let detailRowReg = [];
 
   if (userDb && userDb.DETAIL_ROW && Array.isArray(userDb.DETAIL_ROW.DETAIL_ROW_REG)) {
@@ -287,7 +288,13 @@ async function updateUser(req) {
   if (!userPayload.DETAIL_ROW || typeof userPayload.DETAIL_ROW !== 'object') userPayload.DETAIL_ROW = {};
   userPayload.DETAIL_ROW.DETAIL_ROW_REG = detailRowReg;
 
-  await ZtUser.updateOne({ USERID: userid }, { $set: userPayload });
+  const result = await ZtUser.updateOne(
+  { USERID: userid },
+  { $set: userPayload }
+  );
+  console.log("updateOne result:", result);
+  const usuario_Act= await ZtUser.findOne({ USERID: userid }).lean();
+  console.log("Usuario luego de update:", usuario_Act);
   return ZtUser.findOne({ USERID: userid }).lean();
 }
 

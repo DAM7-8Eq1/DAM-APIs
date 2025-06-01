@@ -42,7 +42,9 @@ const ZtUserSchema = new Schema({
         REGUSER: { type: String }
       }
     ]
-  }
+  },
+  STOCK: { type: Number},
+  SHARES: { type: Number }
 }, {
   collection: 'ZTUSERS',
   timestamps: false

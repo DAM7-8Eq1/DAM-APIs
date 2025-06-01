@@ -1226,42 +1226,344 @@ async function SimulateMomentum(req) {
   return simulacion;
 }
 
+// async function simulateSupertrend(req) {
+//   console.log(req);
+
+//   try {
+//     const { SYMBOL, STARTDATE, ENDDATE, AMOUNT, USERID, SHARES, SPECS } = req || {};
+
+//     if (!SYMBOL || !STARTDATE || !ENDDATE || !AMOUNT || !USERID) {
+//       throw new Error(
+//         "FALTAN PARÁMETROS REQUERIDOS EN EL CUERPO DE LA SOLICITUD: 'SYMBOL', 'STARTDATE', 'ENDDATE', 'AMOUNT', 'USERID'."
+//       );
+//     }
+
+//     if (new Date(ENDDATE) < new Date(STARTDATE)) {
+//       throw new Error(
+//         "La fecha de fin  no puede ser anterior a la fecha de inicio."
+//       );
+//     }
+
+//     // Verificar si AMOUNT es numérico
+//     if (isNaN(AMOUNT) || typeof AMOUNT !== "number" || AMOUNT <= 0) {
+//       throw new Error("El monto a invertir debe ser una cantidad válida.");
+//     }
+
+
+//     //METODO PARA ASIGNAR UN ID A LA SIMULACION BASADO EN LA FECHA
+//     const generateSimulationId = (SYMBOL) => {
+//       const date = new Date();
+//       const timestamp = date.toISOString().replace(/[^0-9]/g, "");
+//       const random = Math.floor(Math.random() * 10000);
+//       return `${SYMBOL}_${timestamp}_${random}`;
+//     };
+
+//     const SIMULATIONID = generateSimulationId(SYMBOL);
+//     const SIMULATIONNAME = "Estrategia Supertrend + MA";
+//     const STRATEGYID = "Supertrend";
+
+//     //Se buscan los identificadores en SPECS
+//     const MALENGTH =
+//       parseInt(
+//         SPECS?.find((i) => i.INDICATOR?.toLowerCase() === "ma_length")?.VALUE
+//       ) || 20;
+//     const ATR_PERIOD =
+//       parseInt(
+//         SPECS?.find((i) => i.INDICATOR?.toLowerCase() === "atr")?.VALUE
+//       ) || 10;
+//     const MULT =
+//       parseFloat(
+//         SPECS?.find((i) => i.INDICATOR?.toLowerCase() === "mult")?.VALUE
+//       ) || 2.0;
+//     const RR =
+//       parseFloat(
+//         SPECS?.find((i) => i.INDICATOR?.toLowerCase() === "rr")?.VALUE
+//       ) || 1.5;
+
+//     if (isNaN(MALENGTH) || isNaN(ATR_PERIOD) || isNaN(MULT) || isNaN(RR)) {
+//       throw new Error(
+//         "Los parámetros para la simulación deben ser valores numéricos."
+//       );
+//     }
+//     if (MALENGTH <= 0 || ATR_PERIOD <= 0 || MULT <= 0 || RR <= 0) {
+//       throw new Error(
+//         "Los parámetros para la simulación deben ser mayores a 0."
+//       );
+//     }
+
+//     //Se realiza la consulta de los historicos a AlphaVantage
+//     const apiKey = process.env.ALPHA_VANTAGE_KEY || "demo";
+//     const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${SYMBOL}&outputsize=full&apikey=${apiKey}`;
+//     const resp = await axios.get(apiUrl);
+
+//     const rawTs = resp.data["Time Series (Daily)"];
+//     if (!rawTs) throw new Error("Respuesta inválida de AlphaVantage");
+
+//     //Ordena las fechas de forma cronológica
+//     const allDatesSorted = Object.keys(rawTs).sort(
+//       (a, b) => new Date(a) - new Date(b)
+//     );
+
+//     //Ajusta el indice de inicio
+//     const extendedStartIndex =
+//       allDatesSorted.findIndex((d) => d >= STARTDATE) -
+//       Math.max(MALENGTH, ATR_PERIOD);
+//     const adjustedStartIndex = extendedStartIndex >= 0 ? extendedStartIndex : 0; //Si no hay suficientes datos históricos, se inicia desde el primer dato disponible.
+
+//     //Filtra y mapea los precios
+//     const prices = allDatesSorted
+//       .slice(adjustedStartIndex) //Toma las fechas desde adjustedStartIndex
+//       .filter((date) => date <= ENDDATE) //Filtra fechas posteriores a ENDDATE
+//       .map((date) => ({
+//         //Convierte cada fecha en un objeto con los datos de precio
+//         DATE: date,
+//         OPEN: +rawTs[date]["1. open"],
+//         HIGH: +rawTs[date]["2. high"],
+//         LOW: +rawTs[date]["3. low"],
+//         CLOSE: +rawTs[date]["4. close"],
+//         VOLUME: +rawTs[date]["5. volume"],
+//       }));
+
+//     //Formula para calcular la Media Móvil Simple (SMA)
+//     const sma = (arr, len) =>
+//       arr.map((_, i) =>
+//         i >= len - 1
+//           ? arr.slice(i - len + 1, i + 1).reduce((a, b) => a + b, 0) / len
+//           : null
+//       );
+
+//     //Formula para calcular el Average True Range (ATR)
+
+//     const atr = (arr, period) => {
+//       const result = Array(arr.length).fill(null);
+//       const trValues = []; // Array para almacenar los TR
+
+//       for (let i = 1; i < arr.length; i++) {
+//         const high = arr[i].HIGH;
+//         const low = arr[i].LOW;
+//         const prevClose = arr[i - 1].CLOSE;
+
+//         // Calcula el TR y lo guarda en el array
+//         const tr = Math.max(
+//           high - low,
+//           Math.abs(high - prevClose),
+//           Math.abs(low - prevClose)
+//         );
+//         trValues.push(tr);
+
+//         // Calcula el ATR cuando hay suficientes datos
+//         if (i >= period) {
+//           const startIdx = i - period;
+//           const atr =
+//             trValues.slice(startIdx, i).reduce((a, b) => a + b, 0) / period;
+//           result[i] = atr;
+//         } else {
+//           result[i] = null;
+//         }
+//       }
+
+//       return result;
+//     };
+//     const closes = prices.map((p) => p.CLOSE); //Se almacena el array de precios de cierre
+//     const ma = sma(closes, MALENGTH); //Se almacena el array de MA calculado
+//     const atrVals = atr(prices, ATR_PERIOD); //Se almacena el array de ATR calculado
+
+//     let position = null;
+//     const signals = [];
+//     let cash = parseFloat(AMOUNT);
+//     let shares = 0;
+//     let realProfit = 0;
+//     const chartData = [];
+
+//     for (let i = MALENGTH; i < prices.length; i++) {
+//       const bar = prices[i];
+//       const close = bar.CLOSE;
+//       const trendUp = close > ma[i];
+//       const trendDown = close < ma[i];
+//       const stopDistance = atrVals[i] * MULT;
+//       const profitDistance = stopDistance * RR;
+
+//       let currentSignal = null;
+//       let reasoning = null;
+//       let profitLoss = 0;
+//       let sharesTransacted = 0;
+
+//       // Lógica de COMPRA (El precio cierra por encima de la MA, y la tendencia es alcista, y el precio del dia anterior estaba por debajo de la MA)
+//       if (!position && cash > 0 && trendUp && closes[i - 1] < ma[i - 1]) {
+//         const invest = cash * 1; // invertimos TODO el capital disponible
+//           const sharesToBuy = Math.floor(invest / close); 
+
+//           if (sharesToBuy >= 1) {                  
+//             cash -= sharesToBuy * close;                  
+//             shares = sharesToBuy;                        
+//             position = {
+//               entryPrice: close,
+//               stop: close - stopDistance,
+//               limit: close + profitDistance,
+//             };
+//             currentSignal = "buy";
+//             reasoning = "Tendencia alcista identificada.";
+//             sharesTransacted = sharesToBuy;                
+//           }
+//       }
+//       // Lógica de VENTA  (El precio alcanza el nivel objetivo o, el precio cae hasta el nivel del stop-loss o, el precio cierra por debajo de la MA)
+//       else if (position) {
+//         if (close >= position.limit || close <= position.stop || trendDown) {
+//             const soldShares = shares;                     
+//             cash += soldShares * close;              
+//             profitLoss = (close - position.entryPrice) * soldShares;
+//             realProfit += profitLoss;
+//             currentSignal = "sell";
+
+//             if (close >= position.limit) {
+//               reasoning = "Precio objetivo alcanzado.";
+//             }
+//             if (close <= position.stop) {
+//               reasoning = "Stop-loss alcanzado.";
+//             }
+//             if (trendDown) {
+//               reasoning = "Precio por debajo de la MA";
+//             }
+//             sharesTransacted = soldShares; 
+//             shares = 0;                     
+//             position = null;
+//         }
+//       }
+
+//       // Registrar la señal (compra o venta)
+//       if (currentSignal) {
+//         signals.push({
+//           DATE: bar.DATE,
+//           TYPE: currentSignal,
+//           PRICE: parseFloat(close.toFixed(2)),
+//           REASONING: reasoning,
+//           SHARES: parseFloat(sharesTransacted.toFixed(15)), // Usar sharesTransacted
+//           PROFIT: parseFloat(profitLoss.toFixed(2)),
+//         });
+//       }
+
+//       // Datos para el gráfico
+//       chartData.push({
+//         ...bar,
+//         INDICATORS: [
+//           { INDICATOR: "ma", VALUE: parseFloat((ma[i] ?? 0).toFixed(2)) },
+//           { INDICATOR: "atr", VALUE: parseFloat((atrVals[i] ?? 0).toFixed(2)) },
+//         ],
+//       });
+//     }
+
+//     // Calcular métricas finales
+//     const finalValue = shares * prices.at(-1).CLOSE;
+//     const finalBalance = cash + finalValue;
+//     const percentageReturn = ((finalBalance - AMOUNT) / AMOUNT) * 100;
+
+//     const summary = {
+//       TOTAL_BOUGHT_UNITS: parseFloat(
+//         signals
+//           .filter((s) => s.TYPE === "buy")
+//           .reduce((a, s) => a + s.SHARES, 0)
+//           .toFixed(5)
+//       ),
+//       TOTAL_SOLD_UNITS: parseFloat(
+//         signals
+//           .filter((s) => s.TYPE === "sell")
+//           .reduce((a, s) => a + s.SHARES, 0)
+//           .toFixed(5)
+//       ),
+//       REMAINING_UNITS: parseFloat(shares.toFixed(5)),
+//       FINAL_CASH: parseFloat(cash.toFixed(2)),
+//       FINAL_VALUE: parseFloat(finalValue.toFixed(2)),
+//       FINAL_BALANCE: parseFloat(finalBalance.toFixed(2)),
+//       REAL_PROFIT: parseFloat(realProfit.toFixed(2)),
+//       PERCENTAGE_RETURN: parseFloat(percentageReturn.toFixed(2)),
+//     };
+
+//     const detailRow = [
+//       {
+//         ACTIVED: true,
+//         DELETED: false,
+//         DETAIL_ROW_REG: [
+//           {
+//             CURRENT: true,
+//             REGDATE: new Date().toISOString().slice(0, 10),
+//             REGTIME: new Date().toLocaleTimeString("es-ES", { hour12: false }),
+//             REGUSER: USERID,
+//           },
+//         ],
+//       },
+//     ];
+//     console.log("CHART_DATA: ", chartData);
+//     const simulationData = {
+//       SIMULATIONID,
+//       USERID,
+//       STRATEGYID,
+//       SIMULATIONNAME,
+//       SYMBOL,
+//       INDICATORS: { value: SPECS },
+//       AMOUNT: parseFloat(AMOUNT.toFixed(2)),
+//       SUMMARY: summary,
+//       STARTDATE,
+//       ENDDATE,
+//       SIGNALS: signals,
+//       CHART_DATA: chartData,
+//       DETAIL_ROW: detailRow,
+//     };
+//     await mongoose.connection
+//       .collection("SIMULATION")
+//       .insertOne(simulationData);
+//     return simulationData;
+//   } catch (error) {
+//     console.error("Error en simulación de Supertrend + MA:", error);
+//     throw error;
+//   }
+// }
+
 async function simulateSupertrend(req) {
   console.log(req);
 
   try {
-    const { SYMBOL, STARTDATE, ENDDATE, AMOUNT, USERID, SPECS } = req || {};
+    // 1) Desestructuramos ahora también SHARES (además de SYMBOL, STARTDATE, ENDDATE, AMOUNT, USERID, SPECS)
+    const {
+      SYMBOL,
+      STARTDATE,
+      ENDDATE,
+      AMOUNT,      // corresponde a this._usuarioActual.STOCK
+      USERID,
+      SHARES,      // corresponde a this._usuarioActual.SHARES
+      SPECS
+    } = req || {};
 
-    if (!SYMBOL || !STARTDATE || !ENDDATE || !AMOUNT || !USERID) {
+    // 2) Validaciones básicas
+    if (!SYMBOL || !STARTDATE || !ENDDATE || AMOUNT == null || !USERID || SHARES == null) {
       throw new Error(
-        "FALTAN PARÁMETROS REQUERIDOS EN EL CUERPO DE LA SOLICITUD: 'SYMBOL', 'STARTDATE', 'ENDDATE', 'AMOUNT', 'USERID'."
+        "FALTAN PARÁMETROS REQUERIDOS EN EL CUERPO DE LA SOLICITUD: 'SYMBOL', 'STARTDATE', 'ENDDATE', 'AMOUNT', 'SHARES', 'USERID'."
       );
     }
 
     if (new Date(ENDDATE) < new Date(STARTDATE)) {
-      throw new Error(
-        "La fecha de fin  no puede ser anterior a la fecha de inicio."
-      );
+      throw new Error("La fecha de fin no puede ser anterior a la fecha de inicio.");
     }
 
-    // Verificar si AMOUNT es numérico
-    if (isNaN(AMOUNT) || typeof AMOUNT !== "number" || AMOUNT <= 0) {
-      throw new Error("El monto a invertir debe ser una cantidad válida.");
+    if (isNaN(AMOUNT) || typeof AMOUNT !== "number" || AMOUNT < 0) {
+      throw new Error("El monto a invertir ('STOCK') debe ser una cantidad válida (>= 0).");
     }
 
-    //METODO PARA ASIGNAR UN ID A LA SIMULACION BASADO EN LA FECHA
-    const generateSimulationId = (SYMBOL) => {
+    if (isNaN(SHARES) || typeof SHARES !== "number" || SHARES < 0) {
+      throw new Error("El número de acciones iniciales ('SHARES') debe ser un número válido (>= 0).");
+    }
+
+    // 3) Generar IDs de simulación
+    const generateSimulationId = (symbol) => {
       const date = new Date();
       const timestamp = date.toISOString().replace(/[^0-9]/g, "");
       const random = Math.floor(Math.random() * 10000);
-      return `${SYMBOL}_${timestamp}_${random}`;
+      return `${symbol}_${timestamp}_${random}`;
     };
-
     const SIMULATIONID = generateSimulationId(SYMBOL);
     const SIMULATIONNAME = "Estrategia Supertrend + MA";
     const STRATEGYID = "Supertrend";
 
-    //Se buscan los identificadores en SPECS
+    // 4) Obtener los parámetros de SPECS (MA, ATR, MULT, RR)
     const MALENGTH =
       parseInt(
         SPECS?.find((i) => i.INDICATOR?.toLowerCase() === "ma_length")?.VALUE
@@ -1279,42 +1581,54 @@ async function simulateSupertrend(req) {
         SPECS?.find((i) => i.INDICATOR?.toLowerCase() === "rr")?.VALUE
       ) || 1.5;
 
-    if (isNaN(MALENGTH) || isNaN(ATR_PERIOD) || isNaN(MULT) || isNaN(RR)) {
-      throw new Error(
-        "Los parámetros para la simulación deben ser valores numéricos."
-      );
-    }
-    if (MALENGTH <= 0 || ATR_PERIOD <= 0 || MULT <= 0 || RR <= 0) {
-      throw new Error(
-        "Los parámetros para la simulación deben ser mayores a 0."
-      );
+    if (
+      isNaN(MALENGTH) ||
+      isNaN(ATR_PERIOD) ||
+      isNaN(MULT) ||
+      isNaN(RR) ||
+      MALENGTH <= 0 ||
+      ATR_PERIOD <= 0 ||
+      MULT <= 0 ||
+      RR <= 0
+    ) {
+      throw new Error("Los parámetros para la simulación (MA_LENGTH, ATR, MULT, RR) deben ser numéricos y > 0.");
     }
 
-    //Se realiza la consulta de los historicos a AlphaVantage
+    // 5) Consultar históricos en AlphaVantage
     const apiKey = process.env.ALPHA_VANTAGE_KEY || "demo";
     const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${SYMBOL}&outputsize=full&apikey=${apiKey}`;
     const resp = await axios.get(apiUrl);
 
     const rawTs = resp.data["Time Series (Daily)"];
-    if (!rawTs) throw new Error("Respuesta inválida de AlphaVantage");
+    if (!rawTs) {
+      throw new Error("Respuesta inválida de AlphaVantage");
+    }
 
-    //Ordena las fechas de forma cronológica
+    // 6) Ordenar fechas cronológicamente
     const allDatesSorted = Object.keys(rawTs).sort(
       (a, b) => new Date(a) - new Date(b)
     );
 
-    //Ajusta el indice de inicio
-    const extendedStartIndex =
-      allDatesSorted.findIndex((d) => d >= STARTDATE) -
-      Math.max(MALENGTH, ATR_PERIOD);
-    const adjustedStartIndex = extendedStartIndex >= 0 ? extendedStartIndex : 0; //Si no hay suficientes datos históricos, se inicia desde el primer dato disponible.
+    // 7) Encontrar la primera fecha en allDatesSorted que sea >= STARTDATE
+    const startDateKey = allDatesSorted.find((d) => d >= STARTDATE);
+    if (!startDateKey) {
+      throw new Error(
+        `No se encontró dato de precio en o después de la fecha de inicio: ${STARTDATE}`
+      );
+    }
+    // Precio unitario inicial según esa fecha real
+    const precioUnitarioInicial = parseFloat(rawTs[startDateKey]["4. close"]);
 
-    //Filtra y mapea los precios
+    // 8) Ajustar índice para calcular indicadores (SMA/ATR) saltando MALENGTH/ATR_PERIOD
+    const idxStartReal = allDatesSorted.indexOf(startDateKey);
+    const extendedStartIndex = idxStartReal - Math.max(MALENGTH, ATR_PERIOD);
+    const adjustedStartIndex = extendedStartIndex >= 0 ? extendedStartIndex : 0;
+
+    // 9) Construir array 'prices' desde adjustedStartIndex hasta ENDDATE
     const prices = allDatesSorted
-      .slice(adjustedStartIndex) //Toma las fechas desde adjustedStartIndex
-      .filter((date) => date <= ENDDATE) //Filtra fechas posteriores a ENDDATE
+      .slice(adjustedStartIndex)       // Toma fechas desde adjustedStartIndex
+      .filter((date) => date <= ENDDATE) // Solo hasta ENDDATE
       .map((date) => ({
-        //Convierte cada fecha en un objeto con los datos de precio
         DATE: date,
         OPEN: +rawTs[date]["1. open"],
         HIGH: +rawTs[date]["2. high"],
@@ -1323,57 +1637,65 @@ async function simulateSupertrend(req) {
         VOLUME: +rawTs[date]["5. volume"],
       }));
 
-    //Formula para calcular la Media Móvil Simple (SMA)
+    // 10) Calcular SMA y ATR
     const sma = (arr, len) =>
       arr.map((_, i) =>
         i >= len - 1
           ? arr.slice(i - len + 1, i + 1).reduce((a, b) => a + b, 0) / len
           : null
       );
-
-    //Formula para calcular el Average True Range (ATR)
-
     const atr = (arr, period) => {
       const result = Array(arr.length).fill(null);
-      const trValues = []; // Array para almacenar los TR
-
+      const trValues = [];
       for (let i = 1; i < arr.length; i++) {
         const high = arr[i].HIGH;
         const low = arr[i].LOW;
         const prevClose = arr[i - 1].CLOSE;
-
-        // Calcula el TR y lo guarda en el array
         const tr = Math.max(
           high - low,
           Math.abs(high - prevClose),
           Math.abs(low - prevClose)
         );
         trValues.push(tr);
-
-        // Calcula el ATR cuando hay suficientes datos
         if (i >= period) {
           const startIdx = i - period;
-          const atr =
+          const atrVal =
             trValues.slice(startIdx, i).reduce((a, b) => a + b, 0) / period;
-          result[i] = atr;
+          result[i] = atrVal;
         } else {
           result[i] = null;
         }
       }
-
       return result;
     };
-    const closes = prices.map((p) => p.CLOSE); //Se almacena el array de precios de cierre
-    const ma = sma(closes, MALENGTH); //Se almacena el array de MA calculado
-    const atrVals = atr(prices, ATR_PERIOD); //Se almacena el array de ATR calculado
 
+    const closes = prices.map((p) => p.CLOSE);
+    const ma = sma(closes, MALENGTH);
+    const atrVals = atr(prices, ATR_PERIOD);
+
+    // 11) Inicializar estado de simulación incluyendo el STOCK y SHARES iniciales
     let position = null;
     const signals = [];
+
+    // Efectivo inicial = AMOUNT
     let cash = parseFloat(AMOUNT);
-    let shares = 0;
+
+    // Cantidad de acciones iniciales = SHARES
+    let shares = parseFloat(SHARES);
+
+    // Valor de esas acciones iniciales (para el SUMMARY)
+    const saldoAccionesInicialSimulacion = shares * precioUnitarioInicial;
+    const saldoInicialSimulacion = cash;
+    const saldoTotalInicialSimulacion = saldoInicialSimulacion + saldoAccionesInicialSimulacion;
+
+    // Dado que no tenemos un "saldo general externo", 
+    // asumimos que "saldo inicial general" = "saldo total inicial simulación"
+    const saldoInicialGeneral = saldoTotalInicialSimulacion;
+
     let realProfit = 0;
     const chartData = [];
 
+    // 12) Bucle de señales a partir de MALENGTH hasta el final de `prices`
     for (let i = MALENGTH; i < prices.length; i++) {
       const bar = prices[i];
       const close = bar.CLOSE;
@@ -1387,56 +1709,68 @@ async function simulateSupertrend(req) {
       let profitLoss = 0;
       let sharesTransacted = 0;
 
-      // Lógica de COMPRA (El precio cierra por encima de la MA, y la tendencia es alcista, y el precio del dia anterior estaba por debajo de la MA)
-      if (!position && cash > 0 && trendUp && closes[i - 1] < ma[i - 1]) {
-        const invest = cash * 1; // Invierto todo el capital disponible, previamente solo se usaba el 50%
-        shares = invest / close;
-        cash -= invest;
-        position = {
-          entryPrice: close,
-          stop: close - stopDistance,
-          limit: close + profitDistance,
-        };
-        currentSignal = "buy";
-        reasoning = "Tendencia alcista identificada.";
-        sharesTransacted = shares; // Registrar unidades compradas
+      // 12.a) Lógica de COMPRA
+      if (
+        !position &&
+        cash > 0 &&
+        trendUp &&
+        closes[i - 1] < ma[i - 1]
+      ) {
+        const invest = cash; // invertimos TODO lo que tengamos
+        const sharesToBuy = Math.floor(invest / close);
+        if (sharesToBuy >= 1) {
+          cash -= sharesToBuy * close;
+          shares += sharesToBuy;
+          position = {
+            entryPrice: close,
+            stop: close - stopDistance,
+            limit: close + profitDistance,
+          };
+          currentSignal = "buy";
+          reasoning = "Tendencia alcista identificada.";
+          sharesTransacted = sharesToBuy;
+        }
       }
-      // Lógica de VENTA  (El precio alcanza el nivel objetivo o, el precio cae hasta el nivel del stop-loss o, el precio cierra por debajo de la MA)
+      // 12.b) Lógica de VENTA
       else if (position) {
-        if (close >= position.limit || close <= position.stop || trendDown) {
-          const soldShares = shares; // Guardar unidades antes de resetear
+        if (
+          close >= position.limit ||
+          close <= position.stop ||
+          trendDown
+        ) {
+          const soldShares = shares;
           cash += soldShares * close;
-          profitLoss = (close - position.entryPrice) * soldShares;
+          profitLoss =
+            (close - position.entryPrice) * soldShares;
           realProfit += profitLoss;
           currentSignal = "sell";
+
           if (close >= position.limit) {
             reasoning = "Precio objetivo alcanzado.";
-          }
-          if (close <= position.stop) {
+          } else if (close <= position.stop) {
             reasoning = "Stop-loss alcanzado.";
-          }
-          if (trendDown) {
+          } else if (trendDown) {
             reasoning = "Precio por debajo de la MA";
           }
-          sharesTransacted = soldShares; // Registrar unidades vendidas
-          shares = 0; // Resetear después de registrar
+          sharesTransacted = soldShares;
+          shares = 0;
           position = null;
         }
       }
 
-      // Registrar la señal (compra o venta)
+      // 12.c) Guardar señal si hubo compra o venta
       if (currentSignal) {
         signals.push({
           DATE: bar.DATE,
           TYPE: currentSignal,
           PRICE: parseFloat(close.toFixed(2)),
           REASONING: reasoning,
-          SHARES: parseFloat(sharesTransacted.toFixed(15)), // Usar sharesTransacted
+          SHARES: parseFloat(sharesTransacted.toFixed(15)),
           PROFIT: parseFloat(profitLoss.toFixed(2)),
         });
       }
 
-      // Datos para el gráfico
+      // 12.d) Llenar chartData para graficar
       chartData.push({
         ...bar,
         INDICATORS: [
@@ -1446,12 +1780,46 @@ async function simulateSupertrend(req) {
       });
     }
 
-    // Calcular métricas finales
-    const finalValue = shares * prices.at(-1).CLOSE;
-    const finalBalance = cash + finalValue;
-    const percentageReturn = ((finalBalance - AMOUNT) / AMOUNT) * 100;
+    // 13) Cálculos finales de la simulación
+    // 13.a) Valor final de las acciones (cantidad de 'shares' * precio cierre del último día)
+    const lastClosePrice = prices.at(-1).CLOSE;
+    const finalValueAcciones = shares * lastClosePrice;
+    
+    // 13.b) Saldo final en simulación = efectivo + valor final de acciones
+    const finalBalanceSimulacion = cash + finalValueAcciones;
 
+    // 13.c) Rendimiento absoluto en simulación
+    const rendimientoSimulacion =
+      finalBalanceSimulacion - saldoInicialSimulacion;
+
+    // 13.d) Porcentaje de rendimiento en simulación
+    const porcentajeRendimientoSimulacion =
+      saldoInicialSimulacion > 0
+        ? ((finalBalanceSimulacion - saldoInicialSimulacion) / saldoInicialSimulacion) * 100
+        : 0;
+
+    // 14) Cálculos “generales”
+    // Como no tenemos capital externo aparte de la simulación, 
+    // tratamos “general” = “simulación”. Por tanto:
+    const saldoTotalGeneralInicial = saldoInicialGeneral;
+    const saldoTotalGeneralFinal = finalBalanceSimulacion;
+    const rendimientoGeneral =
+      saldoTotalGeneralFinal - saldoTotalGeneralInicial;
+    const porcentajeRendimientoGeneral =
+      saldoTotalGeneralInicial > 0
+        ? ((saldoTotalGeneralFinal - saldoTotalGeneralInicial) / saldoTotalGeneralInicial) * 100
+        : 0;
+
+    // 15) Construir el objeto SUMMARY con todas las métricas pedidas
     const summary = {
+      // —— MÉTRICAS INICIALES DE SIMULACIÓN ——
+      SALDO_INICIAL_SIMULACION: parseFloat(saldoInicialSimulacion.toFixed(2)),         // AMOUNT (efectivo)
+      NUM_ACCIONES_INICIALES_SIMULACION: parseFloat(SHARES.toFixed(5)),               // cantidad de acciones al inicio
+      PRECIO_UNITARIO_INICIAL: parseFloat(precioUnitarioInicial.toFixed(2)),         // precio de esas acciones en STARTDATE
+      SALDO_ACCIONES_INICIAL_SIMULACION: parseFloat(saldoAccionesInicialSimulacion.toFixed(2)), // SHARES * precio inicial
+      SALDO_TOTAL_INICIAL_SIMULACION: parseFloat(saldoTotalInicialSimulacion.toFixed(2)),         // efectivo + valor de acciones
+
+      // —— MÉTRICAS DURANTE LA SIMULACIÓN ——
       TOTAL_BOUGHT_UNITS: parseFloat(
         signals
           .filter((s) => s.TYPE === "buy")
@@ -1464,14 +1832,21 @@ async function simulateSupertrend(req) {
           .reduce((a, s) => a + s.SHARES, 0)
           .toFixed(5)
       ),
-      REMAINING_UNITS: parseFloat(shares.toFixed(5)),
-      FINAL_CASH: parseFloat(cash.toFixed(2)),
-      FINAL_VALUE: parseFloat(finalValue.toFixed(2)),
-      FINAL_BALANCE: parseFloat(finalBalance.toFixed(2)),
-      REAL_PROFIT: parseFloat(realProfit.toFixed(2)),
-      PERCENTAGE_RETURN: parseFloat(percentageReturn.toFixed(2)),
+      REMAINING_UNITS: parseFloat(shares.toFixed(5)),          // acciones al final
+      FINAL_SHARE_VALUE: parseFloat(finalValueAcciones.toFixed(2)),  // valor $ de esas acciones al final
+      FINAL_CASH: parseFloat(cash.toFixed(2)),                 // cuánto efectivo quedó
+      FINAL_BALANCE_SIMULACION: parseFloat(finalBalanceSimulacion.toFixed(2)), // total final simulación
+      RENDIMIENTO_SIMULACION: parseFloat(rendimientoSimulacion.toFixed(2)),    // ganancia absoluta
+      PERCENTAGE_RETURN_SIMULACION: parseFloat(porcentajeRendimientoSimulacion.toFixed(2)), // % simulación
+
+      // —— MÉTRICAS “GENERALES” (igual que simulación—porque NO hay capital externo) ——
+      SALDO_INICIAL_GENERAL: parseFloat(saldoTotalGeneralInicial.toFixed(2)),
+      SALDO_TOTAL_GENERAL_FINAL: parseFloat(saldoTotalGeneralFinal.toFixed(2)),
+      RENDIMIENTO_GENERAL: parseFloat(rendimientoGeneral.toFixed(2)),
+      PERCENTAGE_RETURN_GENERAL: parseFloat(porcentajeRendimientoGeneral.toFixed(2))
     };
 
+    // 16) Construir el objeto que guardaremos en MongoDB
     const detailRow = [
       {
         ACTIVED: true,
@@ -1486,7 +1861,7 @@ async function simulateSupertrend(req) {
         ],
       },
     ];
-    console.log("CHART_DATA: ", chartData);
+
     const simulationData = {
       SIMULATIONID,
       USERID,
@@ -1494,7 +1869,8 @@ async function simulateSupertrend(req) {
       SIMULATIONNAME,
       SYMBOL,
       INDICATORS: { value: SPECS },
-      AMOUNT: parseFloat(AMOUNT.toFixed(2)),
+      AMOUNT: parseFloat(AMOUNT.toFixed(2)), // efectivo inicial
+      INITIAL_SHARES: parseFloat(SHARES.toFixed(5)),  // número de acciones iniciales
       SUMMARY: summary,
       STARTDATE,
       ENDDATE,
@@ -1502,9 +1878,8 @@ async function simulateSupertrend(req) {
       CHART_DATA: chartData,
       DETAIL_ROW: detailRow,
     };
-    await mongoose.connection
-      .collection("SIMULATION")
-      .insertOne(simulationData);
+
+    await mongoose.connection.collection("SIMULATION").insertOne(simulationData);
     return simulationData;
   } catch (error) {
     console.error("Error en simulación de Supertrend + MA:", error);

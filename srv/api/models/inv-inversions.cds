@@ -62,8 +62,9 @@ entity SIMULATION {
         SYMBOL             : String;              // "SOL_USDT"
         STARTDATE          : DateTime;            // "2024-05-01"
         ENDDATE            : DateTime;            // "2024-06-30"
-        AMOUNT             : Decimal(18,8);       // "1000"
-        SPECS              : array of SpecType;        
+        AMOUNT             : Double;       // "1000"
+        SPECS              : array of SpecType; 
+        SHARES             : Integer;       
         RESULT             : Decimal(18,8);       // 30.00
         PERCENTAGERETURN   : Decimal(5,4);        // 0.03
         SIGNALS            : array of Signal;     // array de señales

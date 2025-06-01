@@ -93,6 +93,8 @@ entity User {
     AVATAR         : String;
     ROLES          : Array of RoleData;
     DETAIL_ROW     : DetailRow;
+    STOCK          : Double;
+    SHARES         : Integer;
 }
 
 // === NUEVOS TIPOS PARA ROLES ===
