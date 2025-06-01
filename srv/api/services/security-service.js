@@ -263,6 +263,7 @@ async function updateUser(req) {
     throw new Error('No se proporcionó userid en la query string');
   }
   const userPayload = req.data.user;
+  const userVerification = req.data.user.USERID;
   const usaurio = req._.req.query.usermod;
   const now = new Date().toISOString();
   console.log("User ayload", userPayload);
@@ -288,14 +289,8 @@ async function updateUser(req) {
   if (!userPayload.DETAIL_ROW || typeof userPayload.DETAIL_ROW !== 'object') userPayload.DETAIL_ROW = {};
   userPayload.DETAIL_ROW.DETAIL_ROW_REG = detailRowReg;
 
-  const result = await ZtUser.updateOne(
-  { USERID: userid },
-  { $set: userPayload }
-  );
-  console.log("updateOne result:", result);
-  const usuario_Act= await ZtUser.findOne({ USERID: userid }).lean();
-  console.log("Usuario luego de update:", usuario_Act);
-  return ZtUser.findOne({ USERID: userid }).lean();
+  await ZtUser.updateOne({ USERID: userid }, { $set: userPayload });
+  return ZtUser.findOne({ USERID: userVerification }).lean();
 }
 
 async function logicalDeleteUser(req) {
@@ -396,17 +391,30 @@ async function users(req) {
   }
 }
 
+async function userEmail(req) {
+  await connect();
+  const { email } = req.data;
+  if (!email) return [];
+  const user = await ZtUser.findOne({ EMAIL: email }).lean();
+  return user ? [user] : [];
+}
+
 // ─── Funciones para Roles ────────────────────────────────
 async function getAllRoles() {
   await connect();
-  return ZtRole.find({ 'DETAIL_ROW.ACTIVED': true }).lean();
+  // Trae todos los roles, sin filtrar por ACTIVED
+  const roles = await ZtRole.find({}).lean();
+  return roles;
 }
 
 async function getRoleById(req) {
   await connect();
   const { roleid } = req.data;
   if (!roleid) return null;
-  return ZtRole.findOne({ ROLEID: roleid }).lean();
+  //guardamos los roles en una variable aunque se puede hacer directo lo hacemos asi para que sea mas legible
+  const role = await ZtRole.findOne({ ROLEID: roleid }).lean();
+  //la retornamos
+  return role;
 }
 
 async function getUsersByRole(req) {
@@ -429,7 +437,6 @@ async function createRole(req) {
 
   // Aquí podrías validar procesos y privilegios antes de crear
   const nuevoRol = await ZtRole.create(rolePlano);
-
   return JSON.parse(JSON.stringify(nuevoRol));
 }
 
@@ -448,9 +455,9 @@ async function updateRole(req) {
 
 async function logicalDeleteRole(req) {
   await connect();
-  const roleid = req._.req.query.roleid;
+  const roleid = req.data.roleid;
   if (!roleid) {
-    throw new Error('No se proporcionó roleid en la query string');
+    throw new Error('No se proporcionó roleid en el body');
   }
   await ZtRole.updateOne(
     { ROLEID: roleid },
@@ -464,9 +471,9 @@ async function logicalDeleteRole(req) {
 
 async function logicalActivateRole(req) {
   await connect();
-  const roleid = req._.req.query.roleid;
+  const roleid = req.data.roleid;
   if (!roleid) {
-    throw new Error('No se proporcionó roleid en la query string');
+    throw new Error('No se proporcionó roleid en el body');
   }
   await ZtRole.updateOne(
     { ROLEID: roleid },
@@ -491,15 +498,18 @@ async function physicalDeleteRole(req) {
 async function roles(req) {
   const { roleid } = req.data || {};
   if (roleid && roleid.trim() !== '') {
-    // Para operaciones GET compuestas: leemos roleid de req.data
     const role = await getRoleById(req);
-    if (!role) return null;
-    const usersArr = await getUsersByRole(req);
-    role.USERS = usersArr;
-    return role;
+    return role ? [role] : [];
   } else {
     return getAllRoles();
   }
+}
+// Funciones para ZTLABELS
+
+
+async function getAllZtlabels() {
+  await connect();
+  return await ZtLabel.find({ 'DETAIL_ROW.ACTIVED': true }).lean();
 }
 
 module.exports = {
@@ -531,6 +541,7 @@ module.exports = {
   logicalActivateUser,
   physicalDeleteUser,
   users,
+  userEmail,
   // Roles
   getAllRoles,
   getRoleById,
@@ -540,5 +551,6 @@ module.exports = {
   logicalDeleteRole,
   logicalActivateRole,
   physicalDeleteRole,
-  roles
+  roles,
+  getAllZtlabels,
 };

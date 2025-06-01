@@ -74,7 +74,7 @@ entity User {
     FIRSTNAME      : String;
     LASTNAME       : String;
     BIRTHDAYDATE   : String;
-    COMPANYID      : Integer;
+    COMPANYID      : String;
     COMPANYNAME    : String;
     COMPANYALIAS   : String;
     CEDIID         : String;
@@ -112,6 +112,7 @@ entity Role {
     ROLENAME      : String;
     DESCRIPTION   : String;
     // Ahora un arreglo de estructuras en lugar de String
+    APP: String;
     PRIVILEGES    : Array of PrivilegeData;
     DETAIL_ROW    : DetailRow;
 }
@@ -148,3 +149,4 @@ entity View {
     ROUTE       : String;
     DETAIL_ROW  : DetailRow;
 }
+

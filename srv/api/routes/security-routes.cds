@@ -66,9 +66,6 @@ service SecurityRoute @(path:'/api/security') {
   @path: 'users'
   function users(userid: String) returns array of User;
   
-  @Core.Description: 'Obtener usuarios por el correo electrónico'
-  @path: 'userEmail'
-  function userEmail(email: String) returns array of User;
 
   @Core.Description: 'Obtener usuarios auqnue esten desactivados'
   @path: 'usersAll'
@@ -95,6 +92,10 @@ service SecurityRoute @(path:'/api/security') {
   @path: 'removeuser'
   action removeuser(userid: String) returns String;
 
+  @Core.Description: 'Obtener usuario por email'
+  @path: 'userEmail'
+  function userEmail(email: String) returns array of User;
+
   // ─── ROLES ─────────────────────────────────────────
   entity Role as projection on s.Role;
   @Core.Description: 'Obtener roles o un rol por ID (con usuarios asociados si se envía roleid)'
@@ -116,6 +117,10 @@ service SecurityRoute @(path:'/api/security') {
   @Core.Description: 'Eliminado físico de rol'
   @path: 'removerole'
   action removerole(roleid: String) returns String;
+
+  @Core.Description: 'Activado lógico de rol'
+  @path: 'activaterole'
+  action activaterole(roleid: String) returns String;
 
   // ─── VISTAS ─────────────────────────────────────────
   entity View  as projection on s.View;
@@ -152,4 +157,8 @@ service SecurityRoute @(path:'/api/security') {
   @Core.Description: 'Eliminado físico de proceso'
   @path: 'removeprocess'
   action removeprocess(valueid: String) returns String;
+
+  @Core.Description: 'Obtener todos los labels de ZTLABELS'
+  @path: 'getAllZtlabels'
+  function getAllZtlabels() returns array of Catalog;
 }

@@ -4,6 +4,7 @@ const ZtRoleSchema = new Schema({
   ROLEID:      { type: String, required: true, unique: true },
   ROLENAME:    { type: String },
   DESCRIPTION: { type: String },
+  APP:{type: String, default: 'DAM'},
   PRIVILEGES: [
     {
       PROCESSID:   { type: String },
